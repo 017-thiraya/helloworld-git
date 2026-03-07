@@ -1,0 +1,68 @@
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&family=Playpen+Sans+Thai:wght@100..800&display=swap');
+
+* {
+    font-family: "Montserrat", sans-serif;
+    color: rgb(80, 100, 125);
+    margin: 0;
+    padding: 0;
+}
+
+h1 > p {
+    color: rgb(121, 169, 212);
+}
+p {
+    padding: 10px 0;
+}
+
+.img {
+    margin: 50px 100px;
+    padding: 30px 10px;
+    border-radius: 100px;
+}
+
+body {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    background-color: rgb(191, 231, 255);
+}
+.container {
+    display: flex;
+    min-height: 100vh;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+.bord {
+    display: flex;
+    background-color: whitesmoke;
+    border-radius: 5%;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.item {
+    margin: 50px 100px;
+    padding: 30px;
+
+}
+
+.cat {
+    color: orange;
+    background-color: bisque;
+}
+
+.color {
+    color: cornflowerblue;
+    background-color: lightblue;
+}
+
+.sit {
+    color: rgb(219, 114, 114);
+}
+
+.game {
+    color: green;
+    background-color: rgb(206, 245, 219);
+}
