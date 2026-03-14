@@ -1,0 +1,113 @@
+  <!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Todo App</title>
+<style>
+  body { font-family: Arial; margin: 40px; }
+  .todo-item { padding: 6px; cursor: pointer; }
+  .completed { text-decoration: line-through; color: gray; }
+</style>
+</head>
+<body>
+
+  <h2>Todo List</h2>
+  <input id="text-input" placeholder="ชื่องาน">
+  <button id="add-btn">เพิ่มงาน</button>
+  <hr>
+  <ul id="todo-list">
+    
+  </ul>
+
+  <script>
+    const input = document.getElementById('text-input')
+    const addBtn = document.getElementById('add-btn')
+    const list = document.querySelector('#todo-list') // Block Largest
+
+    let todos = [
+        {id: 1 , text: 'Learn Dom', completed: false},
+    ]
+
+    render()
+    function render() {
+        list.innerHTML = ''
+        todos.forEach((todo) => {
+            const li = document.createElement('li')
+            li.className = 'todo-item'
+            li.dataset.id = todo.id
+            const span = document.createElement('span')
+            span.textContent = todo.text
+            li.appendChild(span)
+            if (todo.completed) {
+                li.classList.add('completed')
+            }
+            const editBtn = document.createElement('button')
+            editBtn.textContent = "Edit"
+            editBtn.className = 'edit-btn'
+            li.appendChild(editBtn)
+
+            const deleteBtn = document.createElement('button')
+            deleteBtn.textContent = "Delete"
+            deleteBtn.className = 'delete-btn'
+            li.appendChild(deleteBtn)
+
+            list.appendChild(li)
+
+        })
+    }
+
+    list.addEventListener('click', (e) => {
+        const li = e.target.closest('li')
+        const id = Number(li.dataset.id)
+
+        const todo = todos.find(t => t.id === id)
+
+        if (e.target.tagName === 'LI' || e.target.tagName === 'SPAN') {
+            todo.completed = !todo.completed
+            render()
+        }
+
+        if (e.target.classList.contains("delete-btn")) {
+            const id = Number(e.target.parentElement.dataset.id)
+            todos = todos.filter(todo => todo.id !== id)
+            render()
+            return
+        }
+
+        if (e.target.classList.contains("edit-btn")) {
+            const id = Number(e.target.parentElement.dataset.id)
+            const todo = todos.find(i => i.id === id)
+            const newText = prompt("Edit todo", todo.text)
+            if (newText !== null && newText.trim() !== " ") {
+                todo.text = newText
+                render()
+            }
+            
+        }
+    })
+
+
+
+    addBtn.addEventListener('click', () => {
+        const text = input.value
+        if (text === '') {
+            alert('ไม่กรอกจ่าย 20')
+            return
+        }
+        
+        const newTodo = {
+            id: Date.now(),
+            text: text,
+            completed: false,
+        }
+        
+        todos.push(newTodo)
+        input.value = '' // clear text after click
+        render()
+    })
+
+  </script>
+</body>
+</html> 
+
+ 
