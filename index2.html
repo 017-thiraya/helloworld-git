@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <title>Todo API Workshop</title>
+    <style>
+        /* CSS ตกแต่งเบื้องต้น (พับเก็บไว้ได้เลยไม่ต้องแก้) */
+        body { font-family: sans-serif; background: #f4f7f6; display: flex; justify-content: center; padding: 50px; }
+        .container { background: white; padding: 30px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); width: 100%; max-width: 500px; }
+        .input-group { display: flex; gap: 10px; margin-bottom: 20px; }
+        input[type="text"] { flex: 1; padding: 10px; border: 1px solid #ddd; border-radius: 6px; }
+        button { padding: 10px 15px; border: none; border-radius: 6px; cursor: pointer; color: white; background: #3498db; }
+        .todo-item { display: flex; justify-content: space-between; padding: 10px; background: #f9f9f9; margin-bottom: 8px; border-left: 5px solid #ccc; }
+        .todo-item.completed { border-left-color: #2ecc71; opacity: 0.6; text-decoration: line-through; }
+        .btn-edit { background: #f1c40f; color: #333; }
+        .btn-delete { background: #e74c3c; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>📝 Todo Dashboard</h1>
+        <div class="input-group">
+            <input type="text" id="todo-input" placeholder="วันนี้ต้องทำอะไร?">
+            <button id="add-btn">เพิ่มข้อมูล</button>
+        </div>
+        <ul id="todo-list">
+            </ul>
+    </div>
+
+    <script>
+        const API_URL = "http://localhost:3000/todos";
+
+        // =======================================================
+        // โซนที่ 1: WORKSHOP (เราจะเขียนโค้ดกันแค่ตรงนี้!)
+        // =======================================================
+
+        // 1. GET: ดึงข้อมูลทั้งหมด
+        async function fetchTodos() {
+           try {
+            const response = await fetch(API_URL);
+            if (!response.ok) {
+              throw new Error(`โหลดไม่ขึ้น ${response.status}`)
+            }
+
+            const data = await response.json()
+
+            renderUI(data)
+           }
+           catch(err){
+            console.error(err.message);
+           }
+        }
+
+        // 2. POST: สร้างข้อมูลใหม่
+        async function createTodo(textInput) {
+            try {
+              const response = await fetch(API_URL , {
+                method : "POST",
+                headers : {
+                  "Content-Type" : "application/json"
+                },
+                body : JSON.stringify({text : textInput})
+              });
+              if (!response.ok) throw new Error("สร้าง Todo ไม่สำเร็จ");
+              fetchTodos();
+           
+            }
+            catch(err){
+
+            }
+        }
+
+        // 3. PATCH: อัปเดตสถานะ (สลับ Completed)
+        async function updateTodo(id, currentStatus) {
+            // เดี๋ยวเรามาเขียนตรงนี้กัน
+            try {
+              const updateData = {completed : !currentStatus}
+
+              const response = await await fetch(`${API_URL}/${id}` , {
+                method : "PATCH",
+                headers : {
+                  "Content-Type" : "application/json"
+                },
+                body : JSON.stringify(updateData)
+              });
+              if (!response.ok) throw new Error("อัปเดตไม่สำเร็จ");
+
+              fetchTodos();
+              
+            } catch (error) {
+              console.error("🔥 PATCH พัง:", error.message);
+            }
+        }
+
+        // 4. DELETE: ลบข้อมูล
+        async function deleteTodo(id) {
+           try {
+        const response = await fetch(`${API_URL}/${id}`, {
+            method: "DELETE" 
+        });
+
+        if (!response.ok) throw new Error("หาข้อมูลที่จะลบไม่เจอ");
+
+        fetchTodos(); // ลบเสร็จ โหลดข้อมูลมาวาดใหม่
+
+    } catch (error) {
+        console.error("🔥 DELETE พัง:", error.message);
+    }
+        }
+
+        // =======================================================
+        // โซนที่ 2: DOM MANIPULATION (พี่เตรียมไว้ให้แล้ว)
+        // =======================================================
+        function renderUI(todos) {
+            const list = document.getElementById('todo-list');
+            list.innerHTML = ""; // เคลียร์ข้อมูล ไม่ให้ ข้อมูลในลิสต์ ถูกส่งซ้ำ
+            if (todos.length === 0) return list.innerHTML = "<p>ไม่มีข้อมูล</p>";
+
+            todos.forEach(todo => {
+                const li = document.createElement('li');
+                li.className = `todo-item ${todo.completed ? 'completed' : ''}`;
+                
+                const span = document.createElement('span');
+                span.textContent = todo.text;
+
+                const actions = document.createElement('div');
+                
+                const editBtn = document.createElement('button');
+                editBtn.className = 'btn-edit';
+                editBtn.textContent = todo.completed ? 'ยกเลิก' : 'เสร็จแล้ว';
+                editBtn.onclick = () => updateTodo(todo.id, todo.completed); // ผูกปุ่มเข้ากับฟังก์ชัน PATCH
+
+                const deleteBtn = document.createElement('button');
+                deleteBtn.className = 'btn-delete';
+                deleteBtn.textContent = 'ลบ';
+                deleteBtn.onclick = () => deleteTodo(todo.id); // ผูกปุ่มเข้ากับฟังก์ชัน DELETE
+
+                actions.appendChild(editBtn);
+                actions.appendChild(deleteBtn);
+                li.append(span, actions);
+                list.appendChild(li);
+            });
+        }
+
+        // ผูกปุ่ม "เพิ่มข้อมูล" เข้ากับฟังก์ชัน POST
+        document.getElementById('add-btn').onclick = () => {
+            const input = document.getElementById('todo-input');
+            if (!input.value) return alert("พิมพ์ก่อนสิ!");
+            createTodo(input.value);
+            input.value = ""; 
+        };
+
+        // สั่งให้ดึงข้อมูลทันทีที่เปิดเว็บ
+        fetchTodos(); 
+    </script>
+</body>
+</html>
